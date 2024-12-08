@@ -1,5 +1,4 @@
 {
-  "type": "commonjs",
   "scripts": {
     "dev": "tsx watch ./src",
     "start": "npx tsx ./src/index.ts"
@@ -7,7 +6,11 @@
   "dependencies": {
     "axios": "^1.7.7",
     "cheerio": "^1.0.0",
-    "express": "^4.21.1"
+    "dotenv": "^16.4.7",
+    "express": "^4.21.1",
+    "http-status-codes": "^2.3.0",
+    "p-limit": "^6.1.0",
+    "scraperapi-sdk": "^2.0.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
