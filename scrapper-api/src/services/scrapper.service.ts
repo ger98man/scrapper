@@ -33,11 +33,16 @@ class ScrapperService {
       const scrapedCars: any[] = [];
       $(".ui-search-layout__item").each((_, element) => {
         const title = $(element).find(".poly-component__title").text().trim();
-        const link = $(element).find(".poly-component__title").attr("href");
         const price = $(element).find(".poly-price__current").text().trim();
+        const link = $(element).find("a").attr("href");
 
-        scrapedCars.push({ name: title, price, link });
+        scrapedCars.push({ name: title, price, link: link });
       });
+
+      for (const item of scrapedCars) {
+        const itemResult = await this.scraperapiClient.get(item.link);
+        // todo get item vendor/seller
+      }
 
       return scrapedCars;
     } catch (error) {
