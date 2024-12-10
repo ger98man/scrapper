@@ -30,29 +30,39 @@ class ScrapperService {
     data: ScrapperSearchDto
   ): Promise<any[]> {
     try {
-      const result = await this.scraperapiClient.get(url); // Directly fetch the HTML
-      const $ = cheerio.load(result.body);
+      const apiResult = await this.scraperapiClient.get(url); // Directly fetch the HTML
+      const $ = cheerio.load(apiResult.body);
 
-      const scrapedCars: any[] = [];
+      let totalCount = 0;
+      const scrapedResult: any[] = [];
       $(".ui-search-layout__item").each((_, element) => {
+        totalCount++;
         const seller = $(element).find(".poly-component__seller").text().trim();
         if (seller) {
           const title = $(element).find(".poly-component__title").text().trim();
           const price = $(element).find(".poly-price__current").text().trim();
           const link = $(element).find("a").attr("href");
 
-          scrapedCars.push({ name: title, price, seller, link: link });
+          scrapedResult.push({ title, price, seller, link });
         }
       });
 
       if (!data.isWildSearch) {
-        for (const item of scrapedCars) {
+        for (const item of scrapedResult) {
           const itemResult = await this.scraperapiClient.get(item.link);
           // todo get item vendor/seller
         }
       }
 
-      return scrapedCars;
+      const uniqueSellers = scrapedResult.filter(
+        (item, index, self) =>
+          index === self.findIndex((obj) => obj.seller === item.seller)
+      );
+
+      console.log(
+        `Scrapping result:\nTotal items: ${totalCount}\nTotal with seller: ${scrapedResult.length}\nUnique seller: ${uniqueSellers.length}`
+      );
+      return scrapedResult;
     } catch (error) {
       console.error(`Error scraping page ${url}:`, error);
       return [];
