@@ -2,10 +2,12 @@ export enum Category {
   VEHICLE = "vehicle",
 }
 
-export interface ScrapperParamsDto {
-  model: string;
-  brand: string;
-  category: Category;
+export interface ScrapperSearchDto {
+  isWildSearch: boolean;
+  model?: string;
+  brand?: string;
+  category?: Category;
+  text?: string;
 }
 
 export interface ScrapedCarData {
