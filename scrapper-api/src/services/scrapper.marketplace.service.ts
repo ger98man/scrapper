@@ -2,6 +2,7 @@ import * as cheerio from "cheerio";
 import pLimit from "p-limit";
 import { MercadoScrapedCarData } from "../interfaces/scrapper.mercado.interface";
 import { MarketplaceScrapperSearchDto } from "../interfaces/scrapper.marketplace.interface";
+import nodemailer from "nodemailer";
 
 class ScrapperMarketplaceService {
   private scraperapiClient: any;
@@ -83,6 +84,64 @@ class ScrapperMarketplaceService {
       }
 
       console.log(`Scrapping result:\nTotal items: ${totalCount}`);
+
+      if (products.length !== 0) {
+        const transporter = nodemailer.createTransport({
+          service: "gmail",
+          auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PWD,
+          },
+        });
+
+        // Generate an HTML table for the products
+        const productTable = `
+    <table border="1" style="border-collapse: collapse; width: 100%; text-align: left;">
+      <thead>
+        <tr>
+          <th style="padding: 8px; border: 1px solid #ddd;">Product</th>
+          <th style="padding: 8px; border: 1px solid #ddd;">Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${products
+          .map(
+            (product) => `
+          <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;">
+              <a href="${product.link}" target="_blank" style="text-decoration: none; color: #007bff;">
+                ${product.name}
+              </a>
+            </td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${product.price}</td>
+          </tr>
+        `
+          )
+          .join("")}
+      </tbody>
+    </table>
+  `;
+
+        const mailOptions = {
+          from: process.env.EMAIL_USERNAME,
+          to: "sergjaun@gmail.com",
+          subject: "Scrapping Results",
+          html: `
+      <p>Scrapping result:</p>
+      <p>Total items: ${products.length}</p>
+      ${productTable}
+    `,
+        };
+
+        transporter.sendMail(mailOptions, function (error, info) {
+          if (error) {
+            console.log(error);
+          } else {
+            console.log("Email sent: " + info.response);
+          }
+        });
+      }
+
       return products;
     } catch (error) {
       console.error(`Error scraping page ${url}:`, error);
