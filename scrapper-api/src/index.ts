@@ -2,12 +2,14 @@ import express from "express";
 import { ScrapperService } from "./services/scrapper.service";
 import { StatusCodes } from "http-status-codes";
 import dotenv from "dotenv";
+import { ScrapperMarketplaceService } from "./services/scrapper.marketplace.service";
 
 dotenv.config();
 
 const app = express();
 const port = 3010;
 const scrapperService = new ScrapperService();
+const scrapperMarketplaceService = new ScrapperMarketplaceService();
 
 app.use(express.json());
 app.use((req, res, next) => {
@@ -31,8 +33,13 @@ app.get("/live", (req, res) => {
   res.status(StatusCodes.OK).send("I am alive");
 });
 
-app.post("/process", async (req, res) => {
+app.post("/process/mercado", async (req, res) => {
   const result = await scrapperService.process(req.body);
+  res.json(result);
+});
+
+app.post("/process/marketplace", async (req, res) => {
+  const result = await scrapperMarketplaceService.process(req.body);
   res.json(result);
 });
 

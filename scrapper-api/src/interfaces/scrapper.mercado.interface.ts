@@ -1,16 +1,16 @@
-export enum Category {
+export enum MercadoCategory {
   VEHICLE = "vehicle",
 }
 
-export interface ScrapperSearchDto {
+export interface MercadoScrapperSearchDto {
   isWildSearch: boolean;
   model?: string;
   brand?: string;
-  category?: Category;
+  category?: MercadoCategory;
   text?: string;
 }
 
-export interface ScrapedCarData {
+export interface MercadoScrapedCarData {
   title: string;
   price: string;
   location: string;

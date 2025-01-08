@@ -1,10 +1,10 @@
 import * as cheerio from "cheerio";
 import pLimit from "p-limit";
 import {
-  ScrapperSearchDto,
-  Category,
-  ScrapedCarData,
-} from "../interfaces/scrapper.interface";
+  MercadoScrapperSearchDto,
+  MercadoCategory,
+  MercadoScrapedCarData,
+} from "../interfaces/scrapper.mercado.interface";
 
 class ScrapperService {
   private scraperapiClient: any;
@@ -16,9 +16,9 @@ class ScrapperService {
     this.scraperapiClient = require("scraperapi-sdk")(this.API_KEY);
   }
 
-  private mapCategory(data: ScrapperSearchDto): string {
+  private mapCategory(data: MercadoScrapperSearchDto): string {
     switch (data.category) {
-      case Category.VEHICLE:
+      case MercadoCategory.VEHICLE:
         return `veiculos/carros-caminhonetes/${data.brand}/${data.model}`;
       default:
         throw new Error("Unsupported category");
@@ -27,7 +27,7 @@ class ScrapperService {
 
   private async scrapePage(
     url: string,
-    data: ScrapperSearchDto
+    data: MercadoScrapperSearchDto
   ): Promise<any[]> {
     try {
       const apiResult = await this.scraperapiClient.get(url); // Directly fetch the HTML
@@ -69,13 +69,13 @@ class ScrapperService {
     }
   }
 
-  public async process(data: ScrapperSearchDto): Promise<any[]> {
+  public async process(data: MercadoScrapperSearchDto): Promise<any[]> {
     const completeUrl = data.isWildSearch
       ? `${this.MERCADOLIBRE_URL}/${data.text}`
       : `${this.MERCADOLIBRE_URL}/${this.mapCategory(data)}`;
     const limit = pLimit(this.CONCURRENT_LIMIT);
 
-    const allResults: ScrapedCarData[] = [];
+    const allResults: MercadoScrapedCarData[] = [];
     console.log(`Scraping: ${completeUrl}`);
 
     // todo add pagination
