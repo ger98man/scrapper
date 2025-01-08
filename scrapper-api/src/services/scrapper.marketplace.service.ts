@@ -13,6 +13,12 @@ class ScrapperMarketplaceService {
     this.scraperapiClient = require("scraperapi-sdk")(this.API_KEY);
   }
 
+  private formatPrice(price: string): string {
+    const currencySymbol = price.slice(-1);
+    const numericPrice = parseInt(price.trim(), 10) / 100;
+    return `${numericPrice.toFixed(2)} ${currencySymbol}`;
+  }
+
   private async scrapePage(url: string): Promise<any[]> {
     try {
       const apiResult = await this.scraperapiClient.get(url); // Directly fetch the HTML
@@ -43,10 +49,22 @@ class ScrapperMarketplaceService {
             .text()
             .replace("\\n", "")
             .trim();
-          const merchantName = itemPage(".c-product__seller-info")
-            .first()
-            .find("span")
-            .text();
+
+          const productPriceElement = itemPage(
+            ".c-price.h-price--xx-large.h-price--new"
+          );
+
+          let productPrice = productPriceElement
+            .text()
+            .replace(/\s/g, "")
+            .trim();
+
+          if (!productPrice) {
+            productPrice = itemPage(".c-price.h-price--xx-large.h-price")
+              .text()
+              .replace(/\s/g, "")
+              .trim();
+          }
 
           const merchantLink = itemPage(".c-product__seller-info")
             .find("a")
@@ -55,6 +73,7 @@ class ScrapperMarketplaceService {
           if (merchantLink !== url) {
             products.push({
               name: productName,
+              price: this.formatPrice(productPrice),
               link,
             });
           }
